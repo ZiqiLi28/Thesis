@@ -33,7 +33,7 @@ function App() {
       </div>
       <button className="recognize-button">Recognize</button>
       <footer>
-        <p>Produced by Ziqi Li</p>
+      <p>Produced by <a href="https://github.com/ZiqiLi28" target="_blank" rel="noopener noreferrer">Ziqi Li</a></p>
       </footer>
     </div>
   );
