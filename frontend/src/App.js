@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 // import {BrowserRouter as Router, Route, Routes,Link} from 'react-router-dom';
-// import ErrorPage from './ErrorPage';
-// import SuccessPage from './SuccessPage';
+// import Error from './Error';
+// import Success from './Success';
 import './App.css';
 
 function App() {
