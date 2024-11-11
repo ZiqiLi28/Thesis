@@ -17,6 +17,7 @@ function App() {
   return (
     <div className="App">
       <h1>Number Plate Recognition System</h1>
+      <p>Please ensure the image is as clear as possible</p>
       <div className="upload-section">
         <input 
           type="text" 
