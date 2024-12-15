@@ -12,7 +12,7 @@ model_cfg_path = os.path.join('.', 'model', 'cfg', 'yolov3.cfg')
 model_weights_path = os.path.join('.', 'model', 'weights', 'model.weights')
 class_names_path = os.path.join('.', 'model', 'class.names')
 
-img_path = os.path.join('./data', 'car2.jpg')
+img_path = os.path.join('./data', 'car2.png')
 
 with open(class_names_path, 'r') as f:
     class_names = [j[:-1] for j in f.readlines() if len(j) > 2]
@@ -87,19 +87,18 @@ for bbox_, bbox in enumerate(bboxes):
 
         for out in output:
             text_bbox, text, text_score = out
-            if text_score > 0.4:
-                print(text, text_score)
+            print(text, text_score)
 
-plt.figure()
+# Visualization
+plt.figure(figsize=(10, 6))
+plt.subplot(1, 3, 1)
 plt.imshow(cv2.cvtColor(license_plate, cv2.COLOR_BGR2RGB))
 
-plt.figure()
-plt.imshow(cv2.cvtColor(license_plate_gray, cv2.COLOR_BGR2RGB))
+plt.subplot(1, 3, 2)
+plt.imshow(license_plate_gray, cmap='gray')
 
-plt.figure()
-plt.imshow(cv2.cvtColor(license_plate_thresh, cv2.COLOR_BGR2RGB))
+plt.subplot(1, 3, 3)
+plt.imshow(license_plate_thresh, cmap='gray')
 
-plt.show(block=False) 
-plt.pause(10) 
-plt.close('all')
-sys.exit()
+plt.tight_layout()
+plt.show()
