@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import easyocr
 import util
-import sys
 
 
 # define constants
@@ -12,7 +11,7 @@ model_cfg_path = os.path.join('.', 'model', 'cfg', 'yolov3.cfg')
 model_weights_path = os.path.join('.', 'model', 'weights', 'model.weights')
 class_names_path = os.path.join('.', 'model', 'class.names')
 
-img_path = os.path.join('./data', 'car2.png')
+img_path = os.path.join('./data', 'car3.jpg')
 
 with open(class_names_path, 'r') as f:
     class_names = [j[:-1] for j in f.readlines() if len(j) > 2]
@@ -81,7 +80,7 @@ for bbox_, bbox in enumerate(bboxes):
 
         license_plate_gray = cv2.cvtColor(license_plate, cv2.COLOR_BGR2GRAY)
 
-        _, license_plate_thresh = cv2.threshold(license_plate_gray, 64, 255, cv2.THRESH_BINARY_INV)
+        _, license_plate_thresh = cv2.threshold(license_plate_gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
         output = reader.readtext(license_plate_thresh)
 
