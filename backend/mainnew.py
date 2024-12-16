@@ -99,9 +99,6 @@ for text, score in ocr_results:
 for text, score in filtered_results[:10]:  # Limit to 10
     print(f"- {text} (Confidence: {score:.2f})")
 
-# Draw bounding box on the original image
-cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-
 # Visualization
 plt.figure(figsize=(10, 6))
 plt.subplot(1, 3, 1)
