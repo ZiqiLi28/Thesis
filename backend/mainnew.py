@@ -101,13 +101,11 @@ for text, score in filtered_results[:10]:  # Limit to 10
 
 # Visualization
 plt.figure(figsize=(10, 6))
-plt.subplot(1, 3, 1)
-plt.imshow(cv2.cvtColor(license_plate, cv2.COLOR_BGR2RGB))
 
-plt.subplot(1, 3, 2)
+plt.subplot(1, 2, 1)
 plt.imshow(license_plate_gray, cmap='gray')
 
-plt.subplot(1, 3, 3)
+plt.subplot(1, 2, 2)
 plt.imshow(license_plate_thresh, cmap='gray')
 
 plt.tight_layout()
