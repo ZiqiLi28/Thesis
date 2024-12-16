@@ -9,7 +9,7 @@ import util
 MODEL_CFG_PATH = './model/cfg/yolov3.cfg'
 MODEL_WEIGHTS_PATH = './model/weights/model.weights'
 CLASS_NAMES_PATH = './model/class.names'
-IMG_PATH = './data/car2.png'
+IMG_PATH = './data/car5.jpg'
 
 # Load class names
 with open(CLASS_NAMES_PATH, 'r') as f:
