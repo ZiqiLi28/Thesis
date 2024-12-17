@@ -1,93 +1,112 @@
-import os
+import re
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import easyocr
 import util
 
-# define constants
-model_cfg_path = os.path.join('.', 'model', 'cfg', 'yolov3.cfg')
-model_weights_path = os.path.join('.', 'model', 'weights', 'model.weights')
-class_names_path = os.path.join('.', 'model', 'class.names')
-input_dir = './data'
+# Define constants
+MODEL_CFG_PATH = './model/cfg/yolov3.cfg'
+MODEL_WEIGHTS_PATH = './model/weights/model.weights'
+CLASS_NAMES_PATH = './model/class.names'
+IMG_PATH = './data/car2.jpg'
 
-for img_name in os.listdir(input_dir):
+# Load class names
+with open(CLASS_NAMES_PATH, 'r') as f:
+    class_names = [line.strip() for line in f if line.strip()]
 
-    img_path = os.path.join(input_dir, img_name)
+# Load YOLO model
+net = cv2.dnn.readNetFromDarknet(MODEL_CFG_PATH, MODEL_WEIGHTS_PATH)
 
-    # load class names
-    with open(class_names_path, 'r') as f:
-        class_names = [j[:-1] for j in f.readlines() if len(j) > 2]
-        f.close()
+# Load image
+img = cv2.imread(IMG_PATH)
+H, W, _ = img.shape
 
-    # load model
-    net = cv2.dnn.readNetFromDarknet(model_cfg_path, model_weights_path)
+# Convert image to blob format for YOLO
+blob = cv2.dnn.blobFromImage(img, 1 / 255.0, (416, 416), (0, 0, 0), swapRB=True, crop=False)
+net.setInput(blob)
 
-    # load image
-    img = cv2.imread(img_path)
-    H, W, _ = img.shape
+# Get detections
+detections = util.get_outputs(net)
 
-    # convert image
-    blob = cv2.dnn.blobFromImage(img, 1 / 255, (416, 416), (0, 0, 0), True)
+# Process detections
+bboxes, class_ids, scores = [], [], []
+for detection in detections:
+    xc, yc, w, h = detection[:4]
+    bbox = [int(xc * W), int(yc * H), int(w * W), int(h * H)]
 
-    # get detections
-    net.setInput(blob)
-    detections = util.get_outputs(net)
+    score = np.max(detection[5:])
+    class_id = np.argmax(detection[5:])
 
-    # bboxes, class_ids, confidences
-    bboxes = []
-    class_ids = []
-    scores = []
+    bboxes.append(bbox)
+    class_ids.append(class_id)
+    scores.append(score)
 
-    for detection in detections:
-        # [x1, x2, x3, x4, x5, x6, ..., x85]
-        bbox = detection[:4]
+# Apply Non-Maximum Suppression (NMS)
+bboxes, class_ids, scores = util.NMS(bboxes, class_ids, scores)
 
-        xc, yc, w, h = bbox
-        bbox = [int(xc * W), int(yc * H), int(w * W), int(h * H)]
+# Initialize EasyOCR reader
+reader = easyocr.Reader(['en'])
 
-        bbox_confidence = detection[4]
+# List to store OCR results
+ocr_results = []
 
-        class_id = np.argmax(detection[5:])
-        score = np.amax(detection[5:])
+# Process detected bounding boxes
+for bbox in bboxes:
+    xc, yc, w, h = bbox
+    x1, y1 = int(xc - w / 2), int(yc - h / 2)
+    x2, y2 = int(xc + w / 2), int(yc + h / 2)
 
-        bboxes.append(bbox)
-        class_ids.append(class_id)
-        scores.append(score)
+    # Extract and preprocess license plate region
+    license_plate = img[y1:y2, x1:x2].copy()
+    license_plate_gray = cv2.cvtColor(license_plate, cv2.COLOR_BGR2GRAY)
 
-    # apply nms
-    bboxes, class_ids, scores = util.NMS(bboxes, class_ids, scores)
+    # Generate augmented images for the license plate
+    augmentations = [license_plate_gray]
+    for angle in [-5, 5]:  # Slight rotation
+        M = cv2.getRotationMatrix2D((license_plate.shape[1] // 2, license_plate.shape[0] // 2), angle, 1)
+        rotated = cv2.warpAffine(license_plate_gray, M, (license_plate.shape[1], license_plate.shape[0]))
+        augmentations.append(rotated)
 
-    # plot
-    reader = easyocr.Reader(['en'])
-    for bbox_, bbox in enumerate(bboxes):
-        xc, yc, w, h = bbox
+    for gamma in [0.5, 1.5]:  # Brightness adjustments
+        bright = np.clip(((license_plate_gray / 255.0) ** gamma) * 255, 0, 255).astype(np.uint8)
+        augmentations.append(bright)
 
-        license_plate = img[int(yc - (h / 2)):int(yc + (h / 2)), int(xc - (w / 2)):int(xc + (w / 2)), :].copy()
+    for aug_img in augmentations:
+        # Adaptive thresholding for better OCR performance
+        license_plate_thresh = cv2.adaptiveThreshold(
+            aug_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blockSize=11, C=2
+        )
 
-        img = cv2.rectangle(img,
-                            (int(xc - (w / 2)), int(yc - (h / 2))),
-                            (int(xc + (w / 2)), int(yc + (h / 2))),
-                            (0, 255, 0),
-                            15)
+        # OCR recognition
+        output = reader.readtext(license_plate_thresh, detail=1)
 
-        license_plate_gray = cv2.cvtColor(license_plate, cv2.COLOR_BGR2GRAY)
-        _, license_plate_thresh = cv2.threshold(license_plate_gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        for _, text, text_score in output:
+            ocr_results.append((text, text_score))
 
-        output = reader.readtext(license_plate_thresh)
+# Sort and get the top 10 results by confidence
+ocr_results = sorted(ocr_results, key=lambda x: x[1], reverse=True)[:10]
 
-        for out in output:
-            text_bbox, text, text_score = out
-            print(text, text_score)
+# Filter results to keep only alphanumeric (letters and numbers)
+filtered_results = []
+for text, score in ocr_results:
+    # Use regex to filter out invalid characters
+    clean_text = re.sub(r'[^A-Za-z0-9]', '', text)
+    if clean_text:  # Only add non-empty cleaned results
+        filtered_results.append((clean_text, score))
 
-    # Visualization
-    plt.figure(figsize=(10, 6))
+# Display the results
+for text, score in filtered_results[:10]:  # Limit to 10
+    print(f"- {text} (Confidence: {score:.2f})")
 
-    plt.subplot(1, 2, 1)
-    plt.imshow(license_plate_gray, cmap='gray')
+# Visualization
+plt.figure(figsize=(10, 6))
 
-    plt.subplot(1, 2, 2)
-    plt.imshow(license_plate_thresh, cmap='gray')
+plt.subplot(1, 2, 1)
+plt.imshow(license_plate_gray, cmap='gray')
 
-    plt.tight_layout()
-    plt.show()
+plt.subplot(1, 2, 2)
+plt.imshow(license_plate_thresh, cmap='gray')
+
+plt.tight_layout()
+plt.show()
