@@ -4,12 +4,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 import easyocr
 import util
+from azure.core.credentials import AzureKeyCredential
+from azure.ai.vision import ImageAnalysisClient
+from azure.ai.vision import TextRecognitionMode
+
+# Define constants for Azure
+AZURE_ENDPOINT = "https://<your_endpoint>.cognitiveservices.azure.com/"
+AZURE_KEY = "<your_api_key>"
 
 # Define constants
 MODEL_CFG_PATH = './model/cfg/yolov3.cfg'
 MODEL_WEIGHTS_PATH = './model/weights/model.weights'
 CLASS_NAMES_PATH = './model/class.names'
 IMG_PATH = './data/car2.jpg'
+
+# Initialize Azure Computer Vision client
+client = ImageAnalysisClient(endpoint=AZURE_ENDPOINT, credential=AzureKeyCredential(AZURE_KEY))
+
 
 # Load class names
 with open(CLASS_NAMES_PATH, 'r') as f:
@@ -84,20 +95,40 @@ for bbox in bboxes:
         for _, text, text_score in output:
             ocr_results.append((text, text_score))
 
-# Sort and get the top 10 results by confidence
-ocr_results = sorted(ocr_results, key=lambda x: x[1], reverse=True)[:10]
+# Sort OCR results by EasyOCR confidence
+ocr_results = sorted(ocr_results, key=lambda x: x[1], reverse=True)
 
 # Filter results to keep only alphanumeric (letters and numbers)
 filtered_results = []
 for text, score in ocr_results:
-    # Use regex to filter out invalid characters
-    clean_text = re.sub(r'[^A-Za-z0-9]', '', text)
-    if clean_text:  # Only add non-empty cleaned results
+    clean_text = re.sub(r'[^A-Za-z0-9]', '', text)  # Remove non-alphanumeric characters
+    if clean_text:
         filtered_results.append((clean_text, score))
 
 # Display the results
 for text, score in filtered_results[:10]:  # Limit to 10
     print(f"- {text} (Confidence: {score:.2f})")
+
+# ---- Azure Computer Vision Text Extraction ----
+def azure_text_recognition(img_path):
+    with open(img_path, "rb") as image_stream:
+        # Submit the image to Azure Computer Vision API for text recognition
+        poller = client.begin_read_in_stream(image_stream, TextRecognitionMode.PRINTED)
+        result = poller.result()
+
+        # Extract and display the recognized text from Azure Vision
+        azure_text = []
+        for page_result in result.analyze_result.read_results:
+            for line in page_result.lines:
+                azure_text.append(line.text)
+
+        # Output the recognized text from Azure Vision API
+        print("\n--- Azure Computer Vision Text Recognition Results ---")
+        for line in azure_text:
+            print(f"- {line}")
+
+# Call Azure API to recognize text from the image
+azure_text_recognition(IMG_PATH)
 
 # Visualization
 plt.figure(figsize=(10, 6))
