@@ -5,12 +5,12 @@ import matplotlib.pyplot as plt
 import easyocr
 import util
 from azure.core.credentials import AzureKeyCredential
-from azure.ai.vision import ImageAnalysisClient
-from azure.ai.vision import TextRecognitionMode
+from azure.ai.vision.imageanalysis import ImageAnalysisClient
+from azure.ai.vision.imageanalysis.models import VisualFeatures
 
 # Define constants for Azure
-AZURE_ENDPOINT = "https://<your_endpoint>.cognitiveservices.azure.com/"
-AZURE_KEY = "<your_api_key>"
+endpoint = "https://thsis.cognitiveservices.azure.com/"
+key = "4U0j6yDtILKRXL86eYiSCKtXgw97XvwAq6TJW0KEB5t4DR8FFRsdJQQJ99ALACi5YpzXJ3w3AAAFACOGKe6y"
 
 # Define constants
 MODEL_CFG_PATH = './model/cfg/yolov3.cfg'
@@ -19,7 +19,7 @@ CLASS_NAMES_PATH = './model/class.names'
 IMG_PATH = './data/car2.jpg'
 
 # Initialize Azure Computer Vision client
-client = ImageAnalysisClient(endpoint=AZURE_ENDPOINT, credential=AzureKeyCredential(AZURE_KEY))
+client = ImageAnalysisClient(endpoint=endpoint, credential=AzureKeyCredential(key))
 
 
 # Load class names
@@ -111,21 +111,22 @@ for text, score in filtered_results[:10]:  # Limit to 10
 
 # ---- Azure Computer Vision Text Extraction ----
 def azure_text_recognition(img_path):
-    with open(img_path, "rb") as image_stream:
-        # Submit the image to Azure Computer Vision API for text recognition
-        poller = client.begin_read_in_stream(image_stream, TextRecognitionMode.PRINTED)
-        result = poller.result()
+    # Submit the image for analysis
+    with open(img_path, "rb") as f:
+        image_data = f.read()
+    # Analyze images to extract text
+    result = client.analyze(
+        image_data=image_data,
+        visual_features=[VisualFeatures.READ]
+    )
 
-        # Extract and display the recognized text from Azure Vision
-        azure_text = []
-        for page_result in result.analyze_result.read_results:
-            for line in page_result.lines:
-                azure_text.append(line.text)
-
-        # Output the recognized text from Azure Vision API
-        print("\n--- Azure Computer Vision Text Recognition Results ---")
-        for line in azure_text:
-            print(f"- {line}")
+    # Output
+    if result.read is not None:
+        print("\n--- Azure Computer Vision Recognition Results ---")
+        for line in result.read.blocks[0].lines:
+            print(f"{line.text}")
+    else:
+        print("No text detected.")
 
 # Call Azure API to recognize text from the image
 azure_text_recognition(IMG_PATH)
