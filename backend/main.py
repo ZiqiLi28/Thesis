@@ -128,6 +128,9 @@ def azure_text_recognition(img_path):
     else:
         print("No text detected.")
 
+
+#### if any(char.isdigit() for char in line.text) and any(char.isalpha() for char in line.text): #########
+
 # Call Azure API to recognize text from the image
 azure_text_recognition(IMG_PATH)
 
