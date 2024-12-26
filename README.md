@@ -3,7 +3,11 @@ Implement automatic car number plate recognition system and processing the image
 
 Training set:
 https://www.zemris.fer.hr/projects/LicensePlates/english/results.shtml
+
 https://www.kaggle.com/datasets/abdelhamidzakaria/european-license-plates-dataset
+
 https://github.com/RobertLucian/license-plate-dataset/tree/master/dataset
 
 https://public.roboflow.com/object-detection/license-plates-us-eu/
+
+https://www.kaggle.com/datasets/andrewmvd/car-plate-detection?resource=download&select=images
