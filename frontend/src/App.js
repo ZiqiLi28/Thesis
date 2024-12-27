@@ -1,7 +1,4 @@
 import React, { useState } from 'react';
-// import {BrowserRouter as Router, Route, Routes,Link} from 'react-router-dom';
-// import Error from './Error';
-// import Success from './Success';
 import './App.css';
 
 function App() {
