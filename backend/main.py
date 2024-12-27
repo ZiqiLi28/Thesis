@@ -5,23 +5,20 @@ import matplotlib.pyplot as plt
 import easyocr
 import util
 from flask import Flask, request, jsonify
-###from azure.core.credentials import AzureKeyCredential
-###from azure.ai.vision.imageanalysis import ImageAnalysisClient
-###from azure.ai.vision.imageanalysis.models import VisualFeatures
+# from azure.core.credentials import AzureKeyCredential
+# from azure.ai.vision.imageanalysis import ImageAnalysisClient
+# from azure.ai.vision.imageanalysis.models import VisualFeatures
 
 # Define constants for Azure
-#endpoint = "https://thsis.cognitiveservices.azure.com/"
-#key = "4U0j6yDtILKRXL86eYiSCKtXgw97XvwAq6TJW0KEB5t4DR8FFRsdJQQJ99ALACi5YpzXJ3w3AAAFACOGKe6y"
+# endpoint = "https://thsis.cognitiveservices.azure.com/"
+# key = "4U0j6yDtILKRXL86eYiSCKtXgw97XvwAq6TJW0KEB5t4DR8FFRsdJQQJ99ALACi5YpzXJ3w3AAAFACOGKe6y"
+# client = ImageAnalysisClient(endpoint=endpoint, credential=AzureKeyCredential(key))
 
 # Define constants
 MODEL_CFG_PATH = './model/cfg/yolov3.cfg'
 MODEL_WEIGHTS_PATH = './model/weights/model.weights'
 CLASS_NAMES_PATH = './model/class.names'
 IMG_PATH = './data/car2.jpg'
-
-# Initialize Azure Computer Vision client
-###client = ImageAnalysisClient(endpoint=endpoint, credential=AzureKeyCredential(key))
-
 
 # Load class names
 with open(CLASS_NAMES_PATH, 'r') as f:
@@ -118,7 +115,6 @@ else:
             print(f"- {text} (Confidence: {score:.2f})")
     else:
         print("License plates detected, but no text extracted.")
-
 
 # ---- Azure Computer Vision Text Extraction ----
 # def azure_text_recognition(img_path):
