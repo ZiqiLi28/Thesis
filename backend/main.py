@@ -57,9 +57,6 @@ for detection in detections:
 # Apply Non-Maximum Suppression (NMS)
 bboxes, class_ids, scores = util.NMS(bboxes, class_ids, scores)
 
-# Apply Non-Maximum Suppression (NMS)
-bboxes, class_ids, scores = util.NMS(bboxes, class_ids, scores)
-
 print("\n--- YOLO + OCR Results ---")
 
 # Check if license plates are detected
