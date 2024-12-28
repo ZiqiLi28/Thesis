@@ -1,9 +1,9 @@
 import re
 import cv2
+import util
+import easyocr
 import numpy as np
 import matplotlib.pyplot as plt
-import easyocr
-import util
 from flask import Flask, request, jsonify
 from azure.core.credentials import AzureKeyCredential
 from azure.ai.vision.imageanalysis import ImageAnalysisClient
