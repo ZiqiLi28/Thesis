@@ -5,14 +5,14 @@ import matplotlib.pyplot as plt
 import easyocr
 import util
 from flask import Flask, request, jsonify
-# from azure.core.credentials import AzureKeyCredential
-# from azure.ai.vision.imageanalysis import ImageAnalysisClient
-# from azure.ai.vision.imageanalysis.models import VisualFeatures
+from azure.core.credentials import AzureKeyCredential
+from azure.ai.vision.imageanalysis import ImageAnalysisClient
+from azure.ai.vision.imageanalysis.models import VisualFeatures
 
 # Define constants for Azure
-# endpoint = "https://thsis.cognitiveservices.azure.com/"
-# key = "4U0j6yDtILKRXL86eYiSCKtXgw97XvwAq6TJW0KEB5t4DR8FFRsdJQQJ99ALACi5YpzXJ3w3AAAFACOGKe6y"
-# client = ImageAnalysisClient(endpoint=endpoint, credential=AzureKeyCredential(key))
+endpoint = "https://thsis.cognitiveservices.azure.com/"
+key = "4U0j6yDtILKRXL86eYiSCKtXgw97XvwAq6TJW0KEB5t4DR8FFRsdJQQJ99ALACi5YpzXJ3w3AAAFACOGKe6y"
+client = ImageAnalysisClient(endpoint=endpoint, credential=AzureKeyCredential(key))
 
 # Define constants
 MODEL_CFG_PATH = './model/cfg/yolov3.cfg'
@@ -117,28 +117,28 @@ else:
         print("License plates detected, but no text extracted.")
 
 # ---- Azure Computer Vision Text Extraction ----
-# def azure_text_recognition(img_path):
-#     # Submit the image for analysis
-#     with open(img_path, "rb") as f:
-#         image_data = f.read()
-#     # Analyze images to extract text
-#     result = client.analyze(
-#         image_data=image_data,
-#         visual_features=[VisualFeatures.READ]
-#     )
+def azure_text_recognition(img_path):
+    # Submit the image for analysis
+    with open(img_path, "rb") as f:
+        image_data = f.read()
+    # Analyze images to extract text
+    result = client.analyze(
+        image_data=image_data,
+        visual_features=[VisualFeatures.READ]
+     )
 
-#         print("\n--- Azure Computer Vision Recognition Results ---")
+    print("\n--- Azure Computer Vision Recognition Results ---")
 
-#     # Output
-#     if result.read is not None:
-#         #### if any(char.isdigit() for char in line.text) and any(char.isalpha() for char in line.text): #########
-#         for line in result.read.blocks[0].lines:
-#             print(f"{line.text}")
-#     else:
-#         print("No text detected.")
+    # Output
+    if result.read is not None:
+       # ---------if any(char.isdigit() for char in line.text) and any(char.isalpha() for char in line.text):        -------------------
+        for line in result.read.blocks[0].lines:
+            print(f"{line.text}")
+    else:
+            print("No text detected.")
 
 # Call Azure API to recognize text from the image
-# azure_text_recognition(IMG_PATH)
+azure_text_recognition(IMG_PATH)
 
 # Visualization
 plt.figure(figsize=(10, 6))
