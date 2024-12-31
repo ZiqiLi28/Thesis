@@ -6,12 +6,14 @@ import cv2
 import util
 import easyocr
 import numpy as np
+from flask_cors import CORS
 from flask import Flask, request, jsonify
 from azure.core.credentials import AzureKeyCredential
 from azure.ai.vision.imageanalysis import ImageAnalysisClient
 from azure.ai.vision.imageanalysis.models import VisualFeatures
 
 app = Flask(__name__)
+CORS(app)
 
 # Azure Configuration
 # endpoint = "https://thsis.cognitiveservices.azure.com/"
