@@ -29,15 +29,17 @@ function App() {
         method: 'POST',
         body: formData,
       });
-      const data = await response.json();
 
-      if (response.ok) {
-        setLogs(data.logs);
-        setError('');
-      } else {
-        setError(data.error || 'Something went wrong');
-        setLogs(data.logs || '');
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.error || 'Something went wrong');
+        setLogs(errorData.logs || '');
+        return;
       }
+  
+      const data = await response.json();
+      setLogs(data.logs);
+      setError('');
     } catch (err) {
       setError('Failed to connect to server');
       setLogs('');

@@ -1,3 +1,4 @@
+import os
 import io
 import re
 import sys
@@ -23,22 +24,25 @@ def recognize_plate():
     old_stdout = sys.stdout
     sys.stdout = buffer = io.StringIO()
 
-    if 'image' not in request.files:
-        print("No image file provided")
-        return jsonify({'error': 'No image file provided', 'logs': buffer.getvalue()}), 400
-
-    file = request.files['image']
-    if file.filename == '':
-        print("No selected file")
-        return jsonify({'error': 'No selected file', 'logs': buffer.getvalue()}), 400
-
-    # Save the uploaded file
     img_path = './uploaded_image.jpg'
-    file.save(img_path)
-    print(f"Image saved to {img_path}")
-
+    logs = ""
     try:
-        # YOLO + EasyOCR Processing
+        # Check if image file is provided
+        if 'image' not in request.files:
+            print("No image file provided")
+            logs = buffer.getvalue()
+            return jsonify({'error': 'No image file provided', 'logs': logs}), 400
+
+        file = request.files['image']
+        if file.filename == '':
+            print("No selected file")
+            logs = buffer.getvalue()
+            return jsonify({'error': 'No selected file', 'logs': logs}), 400
+
+        # Save uploaded file
+        file.save(img_path)
+
+        # --- YOLO + EasyOCR Processing ---
         MODEL_CFG_PATH = './model/cfg/yolov3.cfg'
         MODEL_WEIGHTS_PATH = './model/weights/model.weights'
 
@@ -139,11 +143,21 @@ def recognize_plate():
 
     except Exception as e:
         print(f"Error during processing: {str(e)}")
+
     finally:
         # Reset standard output
         logs = buffer.getvalue()
         sys.stdout = old_stdout
-        return jsonify({'logs': logs})
+
+    # Delete the uploaded image after processing
+    try:
+        if os.path.exists(img_path):
+            os.remove(img_path)
+            print(f"Temporary image {img_path} deleted.")
+    except Exception as cleanup_error:
+        print(f"Error cleaning up file: {cleanup_error}")
+
+    return jsonify({'logs': logs})
 
 if __name__ == '__main__':
     from waitress import serve
