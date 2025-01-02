@@ -49,7 +49,6 @@ function App() {
   return (
     <div className="App">
       <h1>Number Plate Recognition System</h1>
-      <p>Please ensure the image is as clear as possible</p>
       <div className="upload-section">
         <input 
           type="text" 
@@ -68,8 +67,8 @@ function App() {
         />
       </div>
       <button className="recognize-button" onClick={handleRecognize}>Recognize</button>
-      {error && <p className="error">{error}</p>}
-      {logs && <pre className="logs">{logs}</pre>}
+      {error && <p className="message" style={{ color: 'red' }}>{error}</p>}
+      {logs && <pre className="message">{logs}</pre>}
       <footer>
         <p>Produced by <a href="https://github.com/ZiqiLi28" target="_blank" rel="noopener noreferrer">Ziqi Li</a></p>
       </footer>
