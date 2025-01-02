@@ -67,7 +67,7 @@ function App() {
         />
       </div>
       <button className="recognize-button" onClick={handleRecognize}>Recognize</button>
-      {error && <p className="message" style={{ color: 'red' }}>{error}</p>}
+      {error && <p className="message">{error}</p>}
       {logs && <pre className="message">{logs}</pre>}
       <footer>
         <p>Produced by <a href="https://github.com/ZiqiLi28" target="_blank" rel="noopener noreferrer">Ziqi Li</a></p>

@@ -50,7 +50,7 @@ footer p {
 }
 
 .message {
-  font-size: 14px;
-  white-space: pre-wrap;
-  margin-top: 15px;
+  text-align: center;
+  font-size: 1.2em;
+  font-family: 'Microsoft Yahei', sans-serif;
 }

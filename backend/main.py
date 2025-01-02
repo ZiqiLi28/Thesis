@@ -116,14 +116,21 @@ def recognize_plate():
                 for aug_img in augmentations:
                     license_plate_thresh = cv2.adaptiveThreshold(aug_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blockSize=11, C=2)
 
-                # OCR recognition
-                output = reader.readtext(license_plate_thresh, detail=1)
-                for _, text, text_score in output:
-                    clean_text = re.sub(r'[^A-Za-z0-9]', '', text)
-                    if clean_text:
-                        ocr_results.append((clean_text, text_score))
-            for text, score in sorted(ocr_results, key=lambda x: x[1], reverse=True)[:10]:
-                print(f"- {text} (Confidence: {score:.2f})")
+                    # OCR recognition
+                    output = reader.readtext(license_plate_thresh, detail=1)
+                    for _, text, text_score in output:
+                        clean_text = re.sub(r'[^A-Za-z0-9]', '', text)
+                        if clean_text:
+                            ocr_results.append((clean_text, text_score))
+        
+            # Sort OCR results by EasyOCR confidence
+            ocr_results = sorted(ocr_results, key=lambda x: x[1], reverse=True)
+
+            if ocr_results:
+                for text, score in ocr_results[:10]:
+                    print(f"- {text} (Confidence: {score:.2f})")
+            else:
+                print("License plates detected, but no text extracted.")
 
         # # --- Azure Text Recognition ---
         # with open(img_path, "rb") as f:
