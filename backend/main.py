@@ -16,9 +16,9 @@ app = Flask(__name__)
 CORS(app)
 
 # Azure Configuration
-# endpoint = "https://thsis.cognitiveservices.azure.com/"
-# key = "4U0j6yDtILKRXL86eYiSCKtXgw97XvwAq6TJW0KEB5t4DR8FFRsdJQQJ99ALACi5YpzXJ3w3AAAFACOGKe6y"
-# client = ImageAnalysisClient(endpoint=endpoint, credential=AzureKeyCredential(key))
+endpoint = "https://thsis.cognitiveservices.azure.com/"
+key = "4U0j6yDtILKRXL86eYiSCKtXgw97XvwAq6TJW0KEB5t4DR8FFRsdJQQJ99ALACi5YpzXJ3w3AAAFACOGKe6y"
+client = ImageAnalysisClient(endpoint=endpoint, credential=AzureKeyCredential(key))
 
 @app.route('/recognize', methods=['POST'])
 def recognize_plate():
@@ -132,23 +132,25 @@ def recognize_plate():
             else:
                 print("License plates detected, but no text extracted.")
 
-        # # --- Azure Text Recognition ---
-        # with open(img_path, "rb") as f:
-        #     image_data = f.read()
+        # --- Azure Text Recognition ---
+        with open(img_path, "rb") as f:
+            image_data = f.read()
 
-        # # Analyze images to extract text
-        # result = client.analyze(image_data=image_data, visual_features=[VisualFeatures.READ])
+        # Analyze images to extract text
+        result = client.analyze(image_data=image_data, visual_features=[VisualFeatures.READ])
 
-        # print("\n--- Azure Computer Vision Results ---")
+        print("\n--- Azure Computer Vision Results ---")
 
-        # # Output
-        # if result.read is not None:
-        # # ---------if any(char.isdigit() for char in line.text) and any(char.isalpha() for char in line.text):        -------------------
-        #     for block in result.read.blocks:
-        #         for line in block.lines:
-        #             print(line.text)
-        # else:
-        #     print("No text detected.")
+        # Output
+        if result.read is not None:
+            for block in result.read.blocks:
+                for line in block.lines:
+                    if any(char.isdigit() for char in line.text) and any(char.isalpha() for char in line.text):
+                        print(line.text)
+                    else:
+                        print("No text detected.")
+        else:
+            print("No text detected.")
 
     except Exception as e:
         print(f"Error during processing: {str(e)}")
