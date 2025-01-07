@@ -5,6 +5,7 @@ import sys
 import cv2
 import util
 import easyocr
+import requests
 import numpy as np
 from flask_cors import CORS
 from flask import Flask, request, jsonify
@@ -15,9 +16,13 @@ from azure.ai.vision.imageanalysis.models import VisualFeatures
 app = Flask(__name__)
 CORS(app)
 
+# Custom Vision Configuration
+custom_vision_key = "5GyTCCKZr35nIbaaaaaaaaaaaaaaQJ99BAACi5YpzXJ3w3AAAIACOGxTEm"
+custom_vision_endpoint = "https://plaaaaaaaaaaaaaaation1/image"
+
 # Azure Configuration
-endpoint = "https://thsis.cognitiveservices.azure.com/"
-key = "4U0j6yDtILKRXL86eYiSCKtXgw97XvwAq6TJW0KEB5t4DR8FFRsdJQQJ99ALACi5YpzXJ3w3AAAFACOGKe6y"
+key = "DLWYNyNyFvcmsehgizBk64wb4aaaaaaaaaaaaaa9BAACi5YpzXJ3w3AAAFACOGny2q"
+endpoint = "https://taaaaaaaaaaaaaaure.com/"
 client = ImageAnalysisClient(endpoint=endpoint, credential=AzureKeyCredential(key))
 
 @app.route('/recognize', methods=['POST'])
@@ -133,24 +138,70 @@ def recognize_plate():
                 print("License plates detected, but no text extracted.")
 
         # --- Azure Text Recognition ---
-        with open(img_path, "rb") as f:
-            image_data = f.read()
+        with open(img_path, 'rb') as img_data:
+            headers = {
+                'Content-Type': 'application/octet-stream',
+                'Prediction-Key': custom_vision_key
+            }
+            response = requests.post(custom_vision_endpoint, headers=headers, data=img_data)
+        
+        if response.status_code != 200:
+            raise Exception(f"Custom Vision API error: {response.text}")
 
-        # Analyze images to extract text
-        result = client.analyze(image_data=image_data, visual_features=[VisualFeatures.READ])
+        detection_results = response.json()
 
+        # Load the image for cropping
+        image = cv2.imread(img_path)
+        H, W, _ = image.shape
+
+        cropped_plates = []
+        for prediction in detection_results.get('predictions', []):
+            if prediction['probability'] > 0.1:
+                bbox = prediction['boundingBox']
+                x1 = int(bbox['left'] * W)
+                y1 = int(bbox['top'] * H)
+                x2 = x1 + int(bbox['width'] * W)
+                y2 = y1 + int(bbox['height'] * H)
+                cropped_plates.append(image[y1:y2, x1:x2])
+
+        if not cropped_plates:
+            print("No license plates detected.")
+            logs = buffer.getvalue()
+            return jsonify({'logs': logs}), 200
+
+        # Use Azure Computer Vision to read text
         print("\n--- Azure Computer Vision Results ---")
 
-        # Output
-        if result.read is not None:
-            for block in result.read.blocks:
-                for line in block.lines:
-                    if any(char.isdigit() for char in line.text) and any(char.isalpha() for char in line.text):
-                        print(line.text)
-                    else:
-                        print("No text detected.")
-        else:
-            print("No text detected.")
+        # Result
+        for i, plate in enumerate(cropped_plates):
+            plate_path = f'./cropped_plate_{i}.jpg'
+            plate_height, plate_width = plate.shape[:2]
+
+            if plate_height < 50 or plate_width < 50:
+                # Calculate scaling factor to make the smallest side at least 60
+                scale_factor = 60 / min(plate_height, plate_width)
+
+                # Resize the image
+                new_width = int(plate_width * scale_factor)
+                new_height = int(plate_height * scale_factor)
+
+                plate = cv2.resize(plate, (new_width, new_height), interpolation=cv2.INTER_LINEAR)
+
+            cv2.imwrite(plate_path, plate)
+
+            # Read text from cropped plate
+            with open(plate_path, "rb") as plate_img:
+                plate_data = plate_img.read()
+            result = client.analyze(image_data=plate_data, visual_features=[VisualFeatures.READ])
+
+            if result.read is not None:
+                for line in result.read.blocks[0].lines:
+                    print(line.text)
+            else:
+                print("No text detected on cropped plate.")
+
+            # Clean up temporary files
+            os.remove(plate_path)
 
     except Exception as e:
         print(f"Error during processing: {str(e)}")
