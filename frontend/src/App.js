@@ -49,6 +49,7 @@ function App() {
   return (
     <div className="App">
       <h1>Number Plate Recognition System</h1>
+      <p>Due to Azure limitations, the size of the image should be less than 4MB. -_-||</p>
       <div className="upload-section">
         <input 
           type="text" 
