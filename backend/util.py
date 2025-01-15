@@ -1,5 +1,5 @@
-import numpy as np
 import cv2
+import numpy as np
 
 def NMS(boxes, class_ids, confidences, overlapThresh = 0.5):
 
