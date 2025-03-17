@@ -1,0 +1,8 @@
+flask
+flask-cors
+opencv-python
+numpy
+easyocr
+requests
+azure-core
+azure-ai-vision
