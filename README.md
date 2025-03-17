@@ -67,4 +67,3 @@ The training and testing datasets used in this project are obtained from the fol
 - **[License Plate Dataset by RobertLucian](https://github.com/RobertLucian/license-plate-dataset/tree/master/dataset)**
 - **[Roboflow License Plates (US/EU)](https://public.roboflow.com/object-detection/license-plates-us-eu/)**
 - **[Kaggle - Car Plate Detection](https://www.kaggle.com/datasets/andrewmvd/car-plate-detection?resource=download&select=images)**
-- 
