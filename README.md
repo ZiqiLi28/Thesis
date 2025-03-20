@@ -22,8 +22,8 @@ This project implements an automatic license plate recognition (ALPR) system usi
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/your-username/license-plate-recognition.git
-   cd license-plate-recognition
+   git clone https://github.com/ZiqiLi28/Thesis.git
+   cd Thesis
 
 2. Install dependencies:
 
