@@ -1,6 +1,6 @@
 # License Plate Recognition Using YOLO and EasyOCR
 
-This project implements an automatic license plate recognition (ALPR) system using YOLO for license plate detection and EasyOCR for optical character recognition (OCR). Additionally, the Azure Custom Vision API is evaluated for comparison in terms of accuracy and robustness.
+This project implements an automatic license plate recognition (ALPR) system using YOLO for license plate detection and EasyOCR for optical character recognition (OCR). Additionally, the Azure Custom Vision API is evaluated for comparison in terms of accuracy and robustness. Building a front-end with React. 
 
 ## Features
 
@@ -15,8 +15,7 @@ This project implements an automatic license plate recognition (ALPR) system usi
 
 - Python 3.8+
 - Required Python libraries (install using `requirements.txt`)
-- Node.js (if using the React front-end)
-- Flask (for backend API)
+- Node.js
 
 ### Setup Instructions
 
